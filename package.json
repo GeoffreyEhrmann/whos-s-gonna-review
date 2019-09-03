@@ -1,0 +1,20 @@
+{
+  "name": "whosgonnareview",
+  "version": "0.0.1",
+  "description": "Web-Component + \u001b[D\u001b[D\u001b[Ds\u001b[C\u001b[D \u001b + PWA + CSS Advanced animation",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "PWA",
+    "WEB",
+    "COMPONENTS"
+  ],
+  "author": "geoffrey.ehrmann",
+  "license": "ISC",
+  "dependencies": {
+    "lit-element": "^2.2.1",
+    "lit-html": "^1.1.2"
+  }
+}
