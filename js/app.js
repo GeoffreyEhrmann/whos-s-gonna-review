@@ -3,118 +3,154 @@ import './card.js';
 
 class WhosGonnaReview extends LitElement {
 
-    static get properties() {
-        return {
-            cards: { type: Array }
-        }
+  static get properties() {
+    return {
+      cards: { type: Array }
     }
+  }
 
-    constructor() {
-        super();
-        this.cards = [];
+  constructor() {
+    super();
+    this.cards = [];
+  }
+
+  getRandomInt(max) {
+    const rand = Math.round(Math.random() * max);
+    console.log(rand + 1);
+
+    return rand + 1;
+  }
+
+  getWinnerDeg(length, winner) {
+    console.log('length', length, 'winner', winner)
+    return {
+      "1": {
+        "1": 0
+      }[winner.toString()],
+      "2": {
+        "1": 0,
+        "2": 180,
+      }[winner.toString()],
+      "3": {
+        "1": 0,
+        "2": 120,
+        "3": 240,
+      }[winner.toString()],
+      "4": {
+        "1": 0,
+        "2": 90,
+        "3": 180,
+        "4": 270,
+      }[winner.toString()],
+      "5": {
+        "1": 0,
+        "2": 72,
+        "3": 144,
+        "4": 216,
+        "5": 288,
+      }[winner.toString()],
+      "6": {
+        "1": 0,
+        "2": 60,
+        "3": 120,
+        "4": 180,
+        "5": 240,
+        "6": 300,
+      }[winner.toString()],
+      "7": {
+        "1": 0,
+        "2": 51.5,
+        "3": 103,
+        "4": 154,
+        "5": 205,
+        "6": 257,
+        "7": 308.5,
+      }[winner.toString()],
+      "8": {
+        "1": 0,
+        "2": 45,
+        "3": 90,
+        "4": 135,
+        "5": 180,
+        "6": 225,
+        "7": 270,
+        "8": 315,
+      }[winner.toString()],
+    }[length.toString()]
+  }
+
+  firstUpdated() {
+    this.$input = this.shadowRoot.querySelector('input');
+  }
+
+  _removeCard(e) {
+    this.resetWheel();
+    this.cards = this.cards.filter((card, index) => {
+      return index !== e.detail;
+    });
+  }
+
+  _addCard(e) {
+    e.preventDefault();
+    this.resetWheel();
+    if (this.$input.value.length > 0 && this.cards.length < 8) {
+      this.cards = [...this.cards, { namee: this.$input.value, className: `card-wgr card-wgr--${this.getRandomInt(7)}` }];
+      this.$input.value = '';
     }
+    // document.querySelector('my-component').shadowRoot.querySelector('button')
+  }
+  async resetWheel() {
+    const containerCards = this.shadowRoot.querySelector('#containerCards');
+    this.cards = this.cards.map((card, index) => ({ ...card, className: `${card.className.substring(0, 20)}` }))
+    this.shadowRoot.querySelector('#containerCards').style.setProperty('--marginContainer', '5rem 2rem');
 
-    getRandomInt(max) {
-        const rand = Math.floor(Math.random() * Math.floor(max));
-        console.log(rand);
+    containerCards.style.setProperty('--showDelete', 'block');
+    containerCards.style.setProperty('--marginContainer', '5rem 2rem');
+    containerCards.style.setProperty('--animation', '');
+    containerCards.style.setProperty('--cardPosition', 'relative');
+    containerCards.style.setProperty('--rotationDeg', 0);
+    containerCards.style.setProperty('--margin-card', '1rem');
+    containerCards.style.setProperty('--perspective', '800');
+    return new Promise((res, rej) => {
+      setTimeout(() => {
+        return res();
+      }, 0)
+    })
+  }
 
-        return rand + 1;
-    }
+  async _launchWheel(e) {
+    console.log('before reseting');
 
-    getWinnerDeg(length, winner) {
-        console.log('length', length, 'winner', winner)
-        return {
-            "1": {
-                "1": 0
-            }[winner.toString()],
-            "2": {
-                "1": 0,
-                "2": 180,
-            }[winner.toString()],
-            "3": {
-                "1": 0,
-                "2": 120,
-                "3": 240,
-            }[winner.toString()],
-            "4": {
-                "1": 0,
-                "2": 90,
-                "3": 180,
-                "4": 270,
-            }[winner.toString()],
-            "5": {
-                "1": 0,
-                "2": 72,
-                "3": 144,
-                "4": 216,
-                "5": 288,
-            }[winner.toString()],
-        }[length.toString()]
-    }
+    await this.resetWheel();
+    const containerCards = this.shadowRoot.querySelector('#containerCards');
 
-    firstUpdated() {
-        this.$input = this.shadowRoot.querySelector('input');
-    }
+    const winner = this.getRandomInt(this.cards.length);
+    const rotationDeg = `${360 * 15 + this.getWinnerDeg(this.cards.length, winner)}deg`;
+    const perspective = this.cards.length > 5 ? '3000' : '800';
 
-    _removeCard(e) {
-        this.resetWheel();
-        this.cards = this.cards.filter((card, index) => {
-            return index !== e.detail;
-        });
-    }
+    this.cards = this.cards.map((card, index) => ({ ...card, className: `${card.className} card-wgr--${this.cards.length}-${index + 1}` }))
 
-    _addCard(e) {
-        e.preventDefault();
-        this.resetWheel();
-        if (this.$input.value.length > 0 && this.cards.length < 5) {
-            this.cards = [...this.cards, { namee: this.$input.value, className: `card-wgr card-wgr--${this.getRandomInt(7)}` }];
-            this.$input.value = '';
-        }
-        // document.querySelector('my-component').shadowRoot.querySelector('button')
-    }
-    async resetWheel() {
-        const containerCards = this.shadowRoot.querySelector('#containerCards');
-        this.cards = this.cards.map((card, index) => ({ ...card, className: `${card.className.substring(0, 20)}` }))
-        this.shadowRoot.querySelector('#containerCards').style.setProperty('--marginContainer', '5rem 2rem');
+    containerCards.style.setProperty('--showDelete', 'none');
+    containerCards.style.setProperty('--marginContainer', '5rem auto');
+    containerCards.style.setProperty('--animation', 'rotation 3s ease-in-out');
+    containerCards.style.setProperty('--cardPosition', 'absolute');
+    containerCards.style.setProperty('--rotationDeg', rotationDeg);
+    containerCards.style.setProperty('--margin-card', '0');
+    containerCards.style.setProperty('--perspective', perspective);
+    setTimeout(() => {
+      containerCards.style.setProperty('--animation', 'rotation 4s ease-in-out forwards');
+      containerCards.style.setProperty('--rotationDeg', `${360 + this.getWinnerDeg(this.cards.length, winner)}deg`);
+    }, 2500)
+  }
 
-        containerCards.style.setProperty('--showDelete', 'block');
-        containerCards.style.setProperty('--animation', '');
-        containerCards.style.setProperty('--cardPosition', 'relative');
-        containerCards.style.setProperty('--rotationDeg', 0);
-        return new Promise((res, rej) => {
-            setTimeout(() => {
-                return res();
-            }, 0)
-        })
-    }
-
-    async _launchWheel(e) {
-        console.log('before reseting');
-
-        await this.resetWheel();
-        const containerCards = this.shadowRoot.querySelector('#containerCards');
-
-        const winner = this.getRandomInt(this.cards.length);
-        const rotationDeg = `${360 * 15 + this.getWinnerDeg(this.cards.length, winner)}deg`;
-        
-        this.cards = this.cards.map((card, index) => ({ ...card, className: `${card.className} card-wgr--${this.cards.length}-${index + 1}` }))
-        
-        containerCards.style.setProperty('--showDelete', 'none');
-        containerCards.style.setProperty('--marginContainer', '5rem auto');
-        containerCards.style.setProperty('--animation', 'rotation 3s ease-in-out');
-        containerCards.style.setProperty('--cardPosition', 'absolute');
-        containerCards.style.setProperty('--rotationDeg', rotationDeg);
-        setTimeout(() => {
-            containerCards.style.setProperty('--animation', 'rotation 4s ease-in-out forwards');
-            containerCards.style.setProperty('--rotationDeg', `${360+this.getWinnerDeg(this.cards.length, winner)}deg`);
-        }, 2500)
-    }
-
-    static get styles() {
-        return css`
+  static get styles() {
+    return css`
           :host {
             --normal-width: 200px;
             --normal-height: 120px;
+            --margin-card: 1rem;
+            --perspective: 800;
+            --marginContainer: 5rem 2rem;
             --nunito: 'Nunito', sans-serif;
           }
           .container-cards {
@@ -133,7 +169,7 @@ class WhosGonnaReview extends LitElement {
               justify-content: center;
           }
           button {
-              cursor: pointer;
+            cursor: pointer;
             border-top-right-radius: 5px;
             border-bottom-right-radius: 5px;
             background: #077A37;
@@ -165,14 +201,13 @@ class WhosGonnaReview extends LitElement {
     flex-direction: column;
     justify-content: center;
     width: 100%;
-    -webkit-perspective: 800;
-            perspective: 800;
-    -webkit-perspective-origin: 50% 75px;
-            perspective-origin: 50% 75px;
+    -webkit-perspective: var(--perspective);
+            perspective: var(--perspective);
+    -webkit-perspective-origin: 50% 175px;
+            perspective-origin: 50% 175px;
   }
   
-  .container-cards {
-    --marginContainer: 5rem 2rem;
+  .container-cards {   
     margin: var(--marginContainer);
     position: relative;
     width: 200px;
@@ -190,10 +225,9 @@ class WhosGonnaReview extends LitElement {
       display: var(--showDelete)
   }
 
-    card-wgr + card-wgr {
-        margin-left: 1rem;
-    }
-
+  card-wgr + card-wgr {
+    margin-left: var(--margin-card);
+  }
   
   .card-wgr {
       text-align: center;
@@ -274,6 +308,103 @@ class WhosGonnaReview extends LitElement {
             transform: translateX(0px) translateZ(150px) rotateY(0deg);
     z-index: 1;
   }
+  .card-wgr--6-1, .card-wgr--7-1, .card-wgr--8-1 {
+    -webkit-transform: translateX(0px) translateZ(350px) rotateY(0deg);
+            transform: translateX(0px) translateZ(350px) rotateY(0deg);
+    z-index: 1;
+  }
+  
+  
+.card-wgr--8-8 {
+  -webkit-transform: translateX(-250px) translateZ(250px) rotateY(-45deg);
+          transform: translateX(-250px) translateZ(250px) rotateY(-45deg);
+}
+
+.card-wgr--8-7 {
+  -webkit-transform: translateX(-350px) translateZ(0) rotateY(-90deg);
+          transform: translateX(-350px) translateZ(0) rotateY(-90deg);
+}
+
+.card-wgr--8-6 {
+  -webkit-transform: translateX(-250px) translateZ(-250px) rotateY(-135deg);
+          transform: translateX(-250px) translateZ(-250px) rotateY(-135deg);
+}
+
+.card-wgr--8-5 {
+  -webkit-transform: translateX(0) translateZ(-350px) rotateY(-180deg);
+          transform: translateX(0) translateZ(-350px) rotateY(-180deg);
+}
+
+.card-wgr--8-4 {
+  -webkit-transform: translateX(250px) translateZ(-250px) rotateY(135deg);
+          transform: translateX(250px) translateZ(-250px) rotateY(135deg);
+}
+
+.card-wgr--8-3 {
+  -webkit-transform: translateX(350px) translateZ(0) rotateY(90deg);
+          transform: translateX(350px) translateZ(0) rotateY(90deg);
+}
+
+.card-wgr--8-2 {
+  -webkit-transform: translateX(250px) translateZ(250px) rotateY(45deg);
+          transform: translateX(250px) translateZ(250px) rotateY(45deg);
+}
+
+.card-wgr--7-7 {
+  -webkit-transform: translateX(-277px) translateZ(217px) rotateY(-51.5deg);
+          transform: translateX(-277px) translateZ(217px) rotateY(-51.5deg);
+}
+
+.card-wgr--7-6 {
+  -webkit-transform: translateX(-340px) translateZ(-77px) rotateY(-103deg);
+          transform: translateX(-340px) translateZ(-77px) rotateY(-103deg);
+}
+
+.card-wgr--7-5 {
+  -webkit-transform: translateX(-154px) translateZ(-315px) rotateY(-154deg);
+          transform: translateX(-154px) translateZ(-315px) rotateY(-154deg);
+}
+
+.card-wgr--7-4 {
+  -webkit-transform: translateX(154px) translateZ(-315px) rotateY(154deg);
+          transform: translateX(154px) translateZ(-315px) rotateY(154deg);
+}
+
+.card-wgr--7-3 {
+  -webkit-transform: translateX(340px) translateZ(-77px) rotateY(103deg);
+          transform: translateX(340px) translateZ(-77px) rotateY(103deg);
+}
+
+.card-wgr--7-2 {
+  -webkit-transform: translateX(277px) translateZ(217px) rotateY(51.5deg);
+          transform: translateX(277px) translateZ(217px) rotateY(51.5deg);
+}
+
+.card-wgr--6-6 {
+  -webkit-transform: translateX(-305px) translateZ(175px) rotateY(-60deg);
+          transform: translateX(-305px) translateZ(175px) rotateY(-60deg);
+}
+
+.card-wgr--6-5 {
+  -webkit-transform: translateX(-305px) translateZ(-175px) rotateY(-120deg);
+          transform: translateX(-305px) translateZ(-175px) rotateY(-120deg);
+}
+
+.card-wgr--6-4 {
+  -webkit-transform: translateX(0) translateZ(-350px) rotateY(180deg);
+          transform: translateX(0) translateZ(-350px) rotateY(180deg);
+}
+
+.card-wgr--6-3 {
+  -webkit-transform: translateX(305px) translateZ(-175px) rotateY(120deg);
+          transform: translateX(305px) translateZ(-175px) rotateY(120deg);
+}
+
+.card-wgr--6-2 {
+  -webkit-transform: translateX(305px) translateZ(175px) rotateY(60deg);
+          transform: translateX(305px) translateZ(175px) rotateY(60deg);
+}
+  
   
   .card-wgr--5-5 {
     -webkit-transform: translateX(-143px) translateZ(47px) rotateY(-72deg);
@@ -347,10 +478,10 @@ class WhosGonnaReview extends LitElement {
     }
   }
         `;
-    }
+  }
 
-    render() {
-        return html`
+  render() {
+    return html`
         <div class="container">
             <form ">
                 <input type="text" placeholder="Add a new participant"></input>
@@ -367,12 +498,12 @@ class WhosGonnaReview extends LitElement {
                         >
                     </card-wgr>
                   `
-        )}
+    )}
         </div>
         <button type="button" class="launcher" @click=${this._launchWheel}>Lancer la roue !</button>
         </div>
         `;
-    }
+  }
 }
 
 window.customElements.define('whos-gonna-review', WhosGonnaReview);
